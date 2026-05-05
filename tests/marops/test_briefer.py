@@ -37,7 +37,7 @@ _TOOL_INPUT = {
             "success_metric": "Open rate >38%",
         }
     ],
-    "optimization_triggers": ["Intent spike → accelerate to step 4"],
+    "optimization_triggers": [{"condition": "intent spike detected", "action": "accelerate to step 4"}],
     "pipeline_projection": {
         "expected_renewals": "~$1.4M ARR",
         "ae_efficiency": "70% task acceptance",
@@ -65,7 +65,8 @@ def _mock_response(tool_input: dict) -> MagicMock:
     return response
 
 
-def test_generate_brief_returns_lifecycle_brief():
+def test_generate_brief_returns_lifecycle_brief(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     with patch("scripts.marops.briefer.anthropic.Anthropic") as mock_client_cls:
         mock_client_cls.return_value.messages.create.return_value = _mock_response(_TOOL_INPUT)
         brief = generate_brief(_CONFIG)
@@ -77,11 +78,19 @@ def test_generate_brief_returns_lifecycle_brief():
     assert brief.meta["input_tokens"] == 1000
 
 
-def test_generate_brief_raises_when_no_tool_use():
+def test_generate_brief_raises_when_no_tool_use(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     with patch("scripts.marops.briefer.anthropic.Anthropic") as mock_client_cls:
         response = MagicMock()
         response.content = []  # no tool_use block
         mock_client_cls.return_value.messages.create.return_value = response
 
         with pytest.raises(RuntimeError, match="did not invoke"):
+            generate_brief(_CONFIG)
+
+
+def test_generate_brief_raises_when_api_key_missing(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    with patch("scripts.marops.briefer.os.environ.get", return_value=None):
+        with pytest.raises(ValueError, match="ANTHROPIC_API_KEY not set"):
             generate_brief(_CONFIG)

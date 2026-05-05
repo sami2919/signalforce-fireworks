@@ -14,6 +14,7 @@ import sys
 import time
 from pathlib import Path
 
+import anthropic
 import yaml
 
 from scripts.marops.briefer import generate_brief
@@ -36,7 +37,17 @@ def run(slug: str) -> Path:
 
     t0 = time.time()
     print(f"[1/2] generating brief for {config.prospect} (Claude API) ...", flush=True)
-    brief = generate_brief(config)
+    try:
+        brief = generate_brief(config)
+    except ValueError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        sys.exit(1)
+    except anthropic.APITimeoutError:
+        print(
+            "[error] Claude API timed out after 60s — open demo/veriforce.html instead",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     t1 = time.time()
     print(
         f"      tokens: in={brief.meta['input_tokens']} out={brief.meta['output_tokens']} "
@@ -47,12 +58,13 @@ def run(slug: str) -> Path:
     json_path = OUT / f"{slug}.json"
     json_path.write_text(json.dumps(brief.model_dump(), indent=2))
 
+    html_path = OUT / f"{slug}.html"
     print(f"[2/2] rendering {slug}.html ...", flush=True)
-    render_html(brief, OUT / f"{slug}.pdf")
+    render_html(brief, html_path)
 
     t2 = time.time()
-    print(f"\nDone. Open: {OUT / slug}.html  (total: {t2 - t0:.1f}s)")
-    return OUT / f"{slug}.html"
+    print(f"\nDone. Open: {html_path}  (total: {t2 - t0:.1f}s)")
+    return html_path
 
 
 if __name__ == "__main__":

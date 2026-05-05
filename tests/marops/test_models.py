@@ -5,6 +5,7 @@ from scripts.marops.models import (
     AgentRole,
     LifecycleBrief,
     MarOpsCampaignConfig,
+    OptimizationTrigger,
     PipelineProjection,
     SegmentDefinition,
     Touch,
@@ -58,7 +59,9 @@ def test_lifecycle_brief_round_trips_json():
         lifecycle_stage="Customer · Re-engagement",
         segment=_make_segment(),
         touches=[_make_touch()],
-        optimization_triggers=["Intent spike: accelerate to step 4"],
+        optimization_triggers=[
+            OptimizationTrigger(condition="intent spike detected", action="accelerate to step 4")
+        ],
         pipeline_projection=PipelineProjection(
             expected_renewals="~$1.4M ARR",
             ae_efficiency="70% task acceptance",

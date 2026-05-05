@@ -263,7 +263,7 @@
   <div class="section-h">Optimization triggers</div>
   <div class="triggers">
     <ul class="opt-list">
-      {% for trig in optimization_triggers %}<li>{{ trig }}</li>{% endfor %}
+      {% for trig in optimization_triggers %}<li><strong>If</strong> {{ trig.condition }} &rarr; {{ trig.action }}</li>{% endfor %}
     </ul>
   </div>
 

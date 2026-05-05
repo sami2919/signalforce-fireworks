@@ -12,7 +12,7 @@ from typing import Any
 
 import anthropic
 
-from scripts.marops.models import LifecycleBrief, MarOpsCampaignConfig
+from scripts.marops.models import LifecycleBrief, MarOpsCampaignConfig, OptimizationTrigger
 
 MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 8192
@@ -102,7 +102,15 @@ _BRIEF_TOOL: dict[str, Any] = {
             },
             "optimization_triggers": {
                 "type": "array",
-                "items": {"type": "string"},
+                "minItems": 1,
+                "items": {
+                    "type": "object",
+                    "required": ["condition", "action"],
+                    "properties": {
+                        "condition": {"type": "string"},
+                        "action": {"type": "string"},
+                    },
+                },
             },
             "pipeline_projection": {
                 "type": "object",
@@ -122,7 +130,10 @@ _BRIEF_TOOL: dict[str, Any] = {
 
 
 def generate_brief(config: MarOpsCampaignConfig) -> LifecycleBrief:
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY not set — run: export ANTHROPIC_API_KEY=sk-...")
+    client = anthropic.Anthropic(api_key=api_key)
 
     user_message = f"""## Campaign Config
 
@@ -141,6 +152,7 @@ Segment filters must use Salesforce SObject.Field__c conventions."""
     response = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
+        timeout=60,
         system=[
             {"type": "text", "text": _SYSTEM_INSTRUCTIONS},
             {
@@ -170,7 +182,9 @@ Segment filters must use Salesforce SObject.Field__c conventions."""
         lifecycle_stage=config.lifecycle_stage,
         segment=payload["segment"],
         touches=payload["touches"],
-        optimization_triggers=payload["optimization_triggers"],
+        optimization_triggers=[
+            OptimizationTrigger(**t) for t in payload["optimization_triggers"]
+        ],
         pipeline_projection=payload["pipeline_projection"],
         meta={
             **payload.get("meta", {}),

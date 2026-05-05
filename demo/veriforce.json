@@ -110,10 +110,10 @@
     }
   ],
   "optimization_triggers": [
-    "Intent spike: if account.intent.g2_review_visits_l7d >= 3 → accelerate to step 4 (skip steps 2–3)",
-    "Negative signal: if support.csat_score <= 2 in l30d → suppress entire campaign and route to CSM (not AE)",
-    "Renewal-window match: if subscription.renews_in_days <= 30 → CSM owns motion, marketing fully suppressed",
-    "Cohort underperformance: if Industry='Construction' segment open rate <25% after 14 days → optimization agent re-segments by sub-vertical (residential vs commercial vs civil)"
+    {"condition": "account.intent.g2_review_visits_l7d >= 3", "action": "accelerate to step 4, skip steps 2-3"},
+    {"condition": "support.csat_score <= 2 in last 30 days", "action": "suppress entire campaign and route to CSM"},
+    {"condition": "subscription.renews_in_days <= 30", "action": "CSM owns motion, marketing fully suppressed"},
+    {"condition": "Industry='Construction' segment open rate <25% after 14 days", "action": "optimization agent re-segments by sub-vertical (residential vs commercial vs civil)"}
   ],
   "pipeline_projection": {
     "expected_renewals": "~$1.4M ARR recovered (12% of $11.6M lapsed Tier-2 cohort, blended close rate 14% on AE-touched, 4% on self-serve renewal)",

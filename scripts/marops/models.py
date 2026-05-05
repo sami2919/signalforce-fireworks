@@ -77,7 +77,7 @@ class LifecycleBrief(BaseModel):
     lifecycle_stage: str
     segment: SegmentDefinition
     touches: list[Touch]
-    optimization_triggers: list[str]
+    optimization_triggers: list[OptimizationTrigger]
     pipeline_projection: PipelineProjection
     meta: dict[str, Any]
 

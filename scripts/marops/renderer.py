@@ -16,7 +16,8 @@ from scripts.marops.models import LifecycleBrief
 _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "renderer" / "marops"
 
 
-def render_html(brief: LifecycleBrief, out_path: Path) -> None:
+def render_html(brief: LifecycleBrief, html_path: Path) -> None:
+    """Render brief to HTML at html_path. Attempts WeasyPrint PDF as best-effort."""
     env = Environment(
         loader=FileSystemLoader(str(_TEMPLATE_DIR)),
         autoescape=select_autoescape(["html", "xml", "j2"]),
@@ -38,15 +39,15 @@ def render_html(brief: LifecycleBrief, out_path: Path) -> None:
         meta=brief.meta,
     )
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    html_out = out_path.with_suffix(".html")
-    html_out.write_text(html)
-    print(f"[ok] wrote {html_out}")
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(html)
+    print(f"[ok] wrote {html_path}")
 
+    pdf_path = html_path.with_suffix(".pdf")
     try:
         from weasyprint import HTML  # type: ignore
 
-        HTML(string=html, base_url=str(_TEMPLATE_DIR)).write_pdf(str(out_path))
-        print(f"[ok] wrote {out_path}")
+        HTML(string=html, base_url=str(_TEMPLATE_DIR)).write_pdf(str(pdf_path))
+        print(f"[ok] wrote {pdf_path}")
     except (ImportError, OSError) as exc:
-        print(f"[skip pdf] {type(exc).__name__}: open {html_out} in Chrome → ⌘P → Save as PDF")
+        print(f"[skip pdf] {type(exc).__name__}: open {html_path} in Chrome → ⌘P → Save as PDF")
