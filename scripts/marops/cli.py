@@ -7,6 +7,7 @@ Usage:
 Reads: examples/marops/<slug>.yaml
 Writes: out/<slug>.json, out/<slug>.html
 """
+
 from __future__ import annotations
 
 import json
@@ -42,9 +43,9 @@ def run(slug: str) -> Path:
     except ValueError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         sys.exit(1)
-    except anthropic.APITimeoutError:
+    except (anthropic.APITimeoutError, anthropic.APIConnectionError) as exc:
         print(
-            "[error] Claude API timed out after 60s — open demo/veriforce.html instead",
+            f"[error] Claude API failed ({type(exc).__name__}) — open demo/veriforce.html instead",
             file=sys.stderr,
         )
         sys.exit(1)

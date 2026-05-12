@@ -42,3 +42,4 @@ config/
 
 # Deprecated: .agents/ was the old ICP context location; replaced by config/
 .agents/
+.gstack/

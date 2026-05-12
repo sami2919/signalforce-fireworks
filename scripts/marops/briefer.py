@@ -4,6 +4,7 @@ Adapted from conversion-walkin/hypothesizer.py.
 Uses prompt caching on the system block — pays cache-write once, reads on every
 subsequent prospect. Cost in steady state: ~$0.002 per brief (Sonnet 4.6, cached).
 """
+
 from __future__ import annotations
 
 import os
@@ -11,8 +12,16 @@ from datetime import datetime, timezone
 from typing import Any
 
 import anthropic
+from dotenv import load_dotenv
 
-from scripts.marops.models import LifecycleBrief, MarOpsCampaignConfig, OptimizationTrigger
+from scripts.marops.models import (
+    LifecycleBrief,
+    MarOpsCampaignConfig,
+    OptimizationTrigger,
+    compute_why_now,
+)
+
+load_dotenv()
 
 MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 8192
@@ -57,14 +66,17 @@ _BRIEF_TOOL: dict[str, Any] = {
     "description": "Submit the complete lifecycle campaign brief in Conversion platform shape.",
     "input_schema": {
         "type": "object",
-        "required": [
-            "segment", "touches", "optimization_triggers", "pipeline_projection", "meta"
-        ],
+        "required": ["segment", "touches", "optimization_triggers", "pipeline_projection", "meta"],
         "properties": {
             "segment": {
                 "type": "object",
-                "required": ["name", "salesforce_filters", "warehouse_traits",
-                             "exclusions", "estimated_size"],
+                "required": [
+                    "name",
+                    "salesforce_filters",
+                    "warehouse_traits",
+                    "exclusions",
+                    "estimated_size",
+                ],
                 "properties": {
                     "name": {"type": "string"},
                     "salesforce_filters": {"type": "array", "items": {"type": "string"}},
@@ -78,9 +90,17 @@ _BRIEF_TOOL: dict[str, Any] = {
                 "minItems": 3,
                 "items": {
                     "type": "object",
-                    "required": ["step", "channel", "agent", "timing", "subject",
-                                 "body_brief", "personalization_tokens", "qa_rules",
-                                 "success_metric"],
+                    "required": [
+                        "step",
+                        "channel",
+                        "agent",
+                        "timing",
+                        "subject",
+                        "body_brief",
+                        "personalization_tokens",
+                        "qa_rules",
+                        "success_metric",
+                    ],
                     "properties": {
                         "step": {"type": "integer"},
                         "channel": {
@@ -114,8 +134,7 @@ _BRIEF_TOOL: dict[str, Any] = {
             },
             "pipeline_projection": {
                 "type": "object",
-                "required": ["expected_renewals", "ae_efficiency",
-                             "campaign_runtime", "downside"],
+                "required": ["expected_renewals", "ae_efficiency", "campaign_runtime", "downside"],
                 "properties": {
                     "expected_renewals": {"type": "string"},
                     "ae_efficiency": {"type": "string"},
@@ -135,6 +154,23 @@ def generate_brief(config: MarOpsCampaignConfig) -> LifecycleBrief:
         raise ValueError("ANTHROPIC_API_KEY not set — run: export ANTHROPIC_API_KEY=sk-...")
     client = anthropic.Anthropic(api_key=api_key)
 
+    why_now_context = ""
+    if config.why_now_signals:
+        lines = ["## Why Now — Active Buying Signals\n"]
+        for s in config.why_now_signals:
+            days = s.get("days_ago", 0)
+            lines.append(
+                f"- [{s.get('signal_type', 'signal').upper()}] {s.get('description', '')} "
+                f"({days}d ago, source: {s.get('source', 'unknown')})"
+            )
+        lines.append(
+            "\nReference these signals in the objective, segment rationale, and "
+            "optimization triggers. The buying window is active — the campaign must "
+            "move fast. Include a 'conference_meet' optimization trigger if a "
+            "conference signal is present."
+        )
+        why_now_context = "\n" + "\n".join(lines)
+
     user_message = f"""## Campaign Config
 
 - **Prospect:** {config.prospect} ({config.prospect_url})
@@ -144,7 +180,7 @@ def generate_brief(config: MarOpsCampaignConfig) -> LifecycleBrief:
 - **Objective:** {config.objective}
 - **Segment description:** {config.segment_description}
 - **Requested touch count:** {config.num_touches}
-
+{why_now_context}
 Produce the full lifecycle campaign brief via the submit_lifecycle_brief tool.
 Every touch must include specific personalization tokens and QA rules.
 Segment filters must use Salesforce SObject.Field__c conventions."""
@@ -152,7 +188,7 @@ Segment filters must use Salesforce SObject.Field__c conventions."""
     response = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
-        timeout=60,
+        timeout=120,
         system=[
             {"type": "text", "text": _SYSTEM_INSTRUCTIONS},
             {
@@ -182,10 +218,9 @@ Segment filters must use Salesforce SObject.Field__c conventions."""
         lifecycle_stage=config.lifecycle_stage,
         segment=payload["segment"],
         touches=payload["touches"],
-        optimization_triggers=[
-            OptimizationTrigger(**t) for t in payload["optimization_triggers"]
-        ],
+        optimization_triggers=[OptimizationTrigger(**t) for t in payload["optimization_triggers"]],
         pipeline_projection=payload["pipeline_projection"],
+        why_now=compute_why_now(config.why_now_signals),
         meta={
             **payload.get("meta", {}),
             "model": MODEL,

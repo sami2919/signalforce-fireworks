@@ -6,9 +6,7 @@ before any implementation exists.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 
-import pytest
 
 from scripts.models import Signal, SignalStrength
 from scripts.icp_fit_scorer import compute_icp_fit

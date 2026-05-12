@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from tests.marops.test_briefer import _TOOL_INPUT
 
 
 def _make_brief_mock() -> MagicMock:

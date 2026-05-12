@@ -4,9 +4,9 @@ Adapted from conversion-walkin/render.py. HTML is the load-bearing artifact —
 Chrome Save-as-PDF renders better than WeasyPrint on macOS.
 WeasyPrint is attempted as best-effort if installed.
 """
+
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -37,6 +37,7 @@ def render_html(brief: LifecycleBrief, html_path: Path) -> None:
         pipeline_projection=payload["pipeline_projection"],
         generated_at=brief.meta.get("generated_at", ""),
         meta=brief.meta,
+        why_now=payload.get("why_now"),
     )
 
     html_path.parent.mkdir(parents=True, exist_ok=True)

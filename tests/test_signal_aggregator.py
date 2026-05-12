@@ -1,6 +1,6 @@
 import pytest
 from scripts.models import Signal, SignalStrength, ICPScore
-from scripts.signal_aggregator import aggregate_and_score, ScoredCompany
+from scripts.signal_aggregator import aggregate_and_score
 from scripts.config_loader import load_config
 
 

@@ -189,6 +189,40 @@
       color: var(--accent); font-weight: 600; margin-bottom: 4px;
       display: block;
     }
+    .why-now-block {
+      border: 2px solid #16a34a;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      background: #f0fdf4;
+    }
+    .why-now-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .why-now-badge {
+      font-size: 8pt; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 2px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .why-now-badge.HIGH { background: #16a34a; color: #fff; }
+    .why-now-badge.MEDIUM { background: #ca8a04; color: #fff; }
+    .why-now-badge.LOW { background: #9ca3af; color: #fff; }
+    .why-now-rationale { font-size: 9pt; color: #15803d; font-weight: 600; }
+    .signal-row {
+      display: flex; align-items: baseline; gap: 8px;
+      font-size: 8.75pt; margin-bottom: 4px; font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .signal-type {
+      font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #6b7280; white-space: nowrap; min-width: 130px;
+    }
+    .signal-desc { color: #1f2937; flex: 1; }
+    .signal-meta { color: #6b7280; white-space: nowrap; font-size: 7.5pt; }
+    .signal-tier { font-weight: 700; }
+    .signal-tier.HIGH { color: #16a34a; }
+    .signal-tier.MEDIUM { color: #ca8a04; }
+    .signal-tier.LOW { color: #9ca3af; }
+    .shelf-life { color: #374151; }
   </style>
 </head>
 <body>
@@ -204,6 +238,26 @@
       Touches: {{ touches|length }}
     </div>
   </div>
+
+  {% if why_now %}
+  <div class="why-now-block">
+    <div class="why-now-header">
+      <span class="why-now-badge {{ why_now.timing_score }}">{{ why_now.timing_score }} timing</span>
+      <span class="why-now-rationale">{{ why_now.rationale }}</span>
+    </div>
+    {% for sig in why_now.signals %}
+    <div class="signal-row">
+      <span class="signal-type">{{ sig.signal_type | replace("_", " ") }}</span>
+      <span class="signal-desc">{{ sig.description }}</span>
+      <span class="signal-meta">
+        {{ sig.source }} &middot;
+        <span class="signal-tier {{ sig.timing_tier }}">{{ sig.timing_tier }}</span>
+        &middot; <span class="shelf-life">{{ sig.days_ago }}d ago &middot; {{ sig.shelf_life_days }}d left</span>
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <div class="campaign-block">
     <div class="name">{{ campaign_name }}</div>
