@@ -191,7 +191,8 @@ class JobPostingScanner:
 
         signals: list[Signal] = []
         for company, postings in company_postings.items():
-            score = self._score_company(len(postings))
+            titles = [p.get("title", "") for p in postings if p.get("title")]
+            score = self._score_company(len(postings), job_titles=titles)
             signal = self._create_signal(company, postings, score)
             signals.append(signal)
 
@@ -256,12 +257,24 @@ class JobPostingScanner:
                 found.append(skill)
         return found
 
-    def _score_company(self, posting_count: int) -> SignalStrength:
-        """Score a company's hiring intent based on posting count."""
+    _MOPS_TITLE_KEYWORDS = {
+        "marketing operations", "marketing technology", "marketing automation",
+        "demand generation", "lifecycle marketing", "revenue operations",
+        "marketing data", "marketing analytics", "martech", "mops",
+    }
+
+    def _score_company(self, posting_count: int, job_titles: list[str] | None = None) -> SignalStrength:
+        """Score hiring intent by posting count, floored to MODERATE for MOPs roles."""
         if posting_count >= 4:
             return SignalStrength.STRONG
         if posting_count >= 2:
             return SignalStrength.MODERATE
+        # Single posting: bump to MODERATE if the title is a MOPs-specific role.
+        # A company actively hiring for MOPs is in the buying mindset regardless of snippet quality.
+        if job_titles:
+            combined = " ".join(job_titles).lower()
+            if any(kw in combined for kw in self._MOPS_TITLE_KEYWORDS):
+                return SignalStrength.MODERATE
         return SignalStrength.WEAK
 
     def _create_signal(

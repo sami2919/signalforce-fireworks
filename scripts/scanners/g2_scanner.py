@@ -25,10 +25,11 @@ _STRONG_KEYWORDS = {"migration", "replacing", "alternative", "evaluating", "swit
 _MODERATE_KEYWORDS = {"complex", "expensive", "slow", "frustrating", "difficult", "overhead", "bloated"}
 
 _G2_QUERIES: list[str] = [
-    'site:g2.com marketo review "complex" OR "migration" OR "alternative"',
-    'site:g2.com "hubspot enterprise" review "snowflake" OR "warehouse" OR "data team"',
-    'site:g2.com marketo review "adobe" "expensive" OR "pricing"',
-    'site:g2.com "marketing automation" review "replacing marketo" OR "marketo alternative"',
+    # Target individual review pages (URL path contains /reviews/), not competitor/alternatives pages
+    'site:g2.com/products/adobe-marketo-engage/reviews "complex" OR "migration" OR "alternative"',
+    'site:g2.com/products/adobe-marketo-engage/reviews "expensive" OR "pricing" OR "adobe"',
+    'site:g2.com/products/hubspot-marketing-hub/reviews "snowflake" OR "warehouse" OR "data team"',
+    'site:g2.com/products/hubspot-marketing-hub/reviews "expensive" OR "enterprise" OR "ceiling"',
 ]
 
 

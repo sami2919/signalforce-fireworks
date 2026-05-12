@@ -60,12 +60,27 @@ _PLG_KEYWORDS: dict[str, float] = {
     "plg": 0.8,
 }
 
+_MOPS_ROLE_KEYWORDS: dict[str, float] = {
+    # A company hiring for these roles has an active MOPs function and a MAP dependency.
+    "marketing operations": 3.0,
+    "marketing automation": 3.0,   # explicitly MAP
+    "marketing technology": 2.5,
+    "demand generation": 2.0,
+    "lifecycle marketing": 2.0,
+    "revenue operations": 1.5,
+    "marketing data engineer": 2.5,  # data + MOPs = warehouse-native gap
+    "marketing analytics": 1.5,
+    "martech": 2.5,
+    "mops": 3.0,
+}
+
 _ALL_TABLES: list[dict[str, float]] = [
     _MAP_PAIN_KEYWORDS,
     _SALESFORCE_KEYWORDS,
     _REVERSE_ETL_KEYWORDS,
     _WAREHOUSE_KEYWORDS,
     _PLG_KEYWORDS,
+    _MOPS_ROLE_KEYWORDS,
 ]
 
 _MAX_SCORE = 10.0
