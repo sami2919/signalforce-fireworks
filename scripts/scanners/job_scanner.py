@@ -17,7 +17,7 @@ import json
 import logging
 import re
 from collections import defaultdict
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from scripts.api_client import BaseAPIClient
 from scripts.scanners.base import ScannerConfig, ScanResult, Signal, SignalStrength
@@ -75,7 +75,9 @@ class JobPostingClient(BaseAPIClient):
                     "title": item.get("title", ""),
                     "url": item.get("link", ""),
                     "snippet": item.get("snippet", ""),
-                    "company": item.get("source", None),
+                    # Don't use "source" — it's the job board domain (e.g. "LinkedIn"),
+                    # not the hiring company. Let _extract_company_from_result parse it.
+                    "company": None,
                 }
             )
         return results
@@ -88,10 +90,14 @@ class JobPostingClient(BaseAPIClient):
 _URL_PATTERNS: list[tuple[str, str]] = [
     (r"jobs\.lever\.co/([^/]+)", "lever"),
     (r"boards\.greenhouse\.io/([^/]+)", "greenhouse"),
+    (r"job-boards\.greenhouse\.io/([^/]+)", "greenhouse"),
     (r"app\.ashbyhq\.com/jobs/([^/]+)", "ashby"),
+    (r"jobs\.ashbyhq\.com/([^/]+)", "ashby"),
 ]
 
-_TITLE_AT_PATTERN = re.compile(r"\bat\s+([A-Z][A-Za-z0-9\-]+(?:\s+[A-Z][A-Za-z0-9\-]+)*)\s*$")
+_TITLE_AT_PATTERN = re.compile(
+    r"(?:\bat\s+|@\s*)([A-Z][A-Za-z0-9][A-Za-z0-9\.\-]*(?:\s+[A-Z][A-Za-z0-9][A-Za-z0-9\.\-]*)*)(?:\s*[-–].*)?$"
+)
 
 # Default skills vocabulary (used when no skills configured; kept for backward compat)
 _DEFAULT_SKILLS: list[str] = [
@@ -134,8 +140,11 @@ class JobPostingScanner:
         self,
         titles: list[str] | None = None,
         skills: list[str] | None = None,
+        api_key: str | None = None,
     ) -> None:
-        self._client = JobPostingClient()
+        from scripts.config import get_config
+        resolved_key = api_key or get_config().serpapi_key
+        self._client = JobPostingClient(api_key=resolved_key)
         self.JOB_TITLES = titles or []
         self._skills = skills if skills is not None else _DEFAULT_SKILLS
 
@@ -155,7 +164,7 @@ class JobPostingScanner:
         6. Deduplicate: same company across multiple queries → single signal.
         7. Return ScanResult.
         """
-        started_at = datetime.now(UTC)
+        started_at = datetime.now(timezone.utc)
         queries = self._build_search_queries(lookback_days)
 
         company_postings: dict[str, list[dict]] = defaultdict(list)
@@ -186,7 +195,7 @@ class JobPostingScanner:
             signal = self._create_signal(company, postings, score)
             signals.append(signal)
 
-        completed_at = datetime.now(UTC)
+        completed_at = datetime.now(timezone.utc)
 
         return ScanResult(
             scan_type="job_posting",
@@ -207,21 +216,34 @@ class JobPostingScanner:
         domain_filter = " OR ".join(f"site:{d}" for d in self.JOB_BOARD_DOMAINS)
         return [f"{title} {domain_filter}" for title in self.JOB_TITLES]
 
+    # Job board slugs that represent the board itself, not a company
+    _BOARD_SLUGS = {"platform-engineering", "jobs", "job-boards"}
+
     def _extract_company_from_result(self, result: dict) -> str | None:
-        """Attempt to extract a company name from a search result."""
+        """Attempt to extract a company name from a search result.
+
+        Prefers the hiring company name from the job title (e.g. '@ Vanta')
+        over the job board slug, since aggregation pages return the board
+        domain slug (e.g. 'platform-engineering') rather than the employer.
+        """
+        # Prefer explicit company field if available
         if result.get("company"):
             return result["company"]
 
-        url = result.get("url", "")
-        for pattern, _board in _URL_PATTERNS:
-            match = re.search(pattern, url)
-            if match:
-                return match.group(1)
-
+        # Try title first — most reliable for aggregation pages
         title = result.get("title", "")
         title_match = _TITLE_AT_PATTERN.search(title)
         if title_match:
             return title_match.group(1)
+
+        # Fall back to URL slug, but skip known board-level slugs
+        url = result.get("url", "")
+        for pattern, _board in _URL_PATTERNS:
+            match = re.search(pattern, url)
+            if match:
+                slug = match.group(1)
+                if slug not in self._BOARD_SLUGS:
+                    return slug
 
         return None
 
@@ -355,23 +377,9 @@ def main(argv: list[str] | None = None) -> None:
         print(f"  [{strength_label:8s}] {signal.company_name} — {posting_count} posting(s)")
 
     if args.output:
-        output_data = {
-            "scan_id": result.scan_id,
-            "scan_type": result.scan_type,
-            "started_at": result.started_at.isoformat(),
-            "completed_at": result.completed_at.isoformat(),
-            "total_raw_results": result.total_raw_results,
-            "total_after_dedup": result.total_after_dedup,
-            "signals": [
-                {
-                    "company_name": s.company_name,
-                    "signal_strength": s.signal_strength,
-                    "source_url": s.source_url,
-                    "metadata": s.metadata,
-                }
-                for s in filtered_signals
-            ],
-        }
+        output_data = result.model_copy(
+            update={"signals_found": filtered_signals}
+        ).model_dump(mode="json")
         with open(args.output, "w") as f:
             json.dump(output_data, f, indent=2, default=str)
         print(f"\nResults written to {args.output}")
