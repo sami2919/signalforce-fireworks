@@ -108,6 +108,12 @@ def _extract_text(signal: Signal) -> str:
         if isinstance(activity, dict):
             parts.append(activity.get("topic", ""))
 
+    # MAP frustration / blog signals store content directly on raw_data
+    for key in ("snippet", "title", "body"):
+        val = signal.raw_data.get(key)
+        if isinstance(val, str):
+            parts.append(val)
+
     return " ".join(parts).lower()
 
 

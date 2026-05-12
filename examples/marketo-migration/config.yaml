@@ -154,40 +154,39 @@ scanners:
   github:
     enabled: true
     module: "scripts.scanners.github_scanner"
-    lookback_days: 14
+    lookback_days: 30
     topics:
+      # MAP-integration topics: companies building on top of or around a legacy MAP
       - "marketing-automation"
-      - "email-automation"
-      - "campaign-management"
-      - "dbt"
-      - "data-pipeline"
       - "crm-integration"
       - "salesforce-integration"
       - "customer-data-platform"
-    libraries:
+      - "email-automation"
+      # Reverse ETL / warehouse topics: companies bridging their warehouse to a MAP
+      - "reverse-etl"
       - "hightouch"
       - "census"
-      - "segment"
-      - "airbyte"
-      - "fivetran"
-      - "dbt"
+    libraries:
+      # Middleware libs: companies using these are papering over their MAP's limitations
+      - "hightouch"
+      - "census"
       - "snowflake-connector-python"
       - "google-cloud-bigquery"
     keywords:
-      - "Marketo alternative"
-      - "HubSpot migration"
-      - "warehouse-native"
-      - "reverse ETL"
-      - "lifecycle email"
-      - "campaign orchestration"
-      - "Salesforce marketing"
-      # Friction artifact keywords — actual code that signals MAP limitations
+      # Friction artifact keywords — actual integration code signals MAP pain
       - "marketo_client"
-      - "hubspot-api wrapper"
+      - "marketo-api"
+      - "hubspot-api"
       - "HubSpot REST API"
       - "marketo python"
-      - "marketo soap"
       - "pardot python"
+      - "marketo soap"
+      # Replacement intent — companies explicitly evaluating or replacing their MAP
+      - "Marketo alternative"
+      - "HubSpot migration"
+      - "MAP replacement"
+      - "warehouse-native marketing"
+      - "campaign orchestration warehouse"
 
   arxiv:
     enabled: false   # Not applicable for B2B SaaS martech buyers
@@ -200,7 +199,7 @@ scanners:
   jobs:
     enabled: true
     module: "scripts.scanners.job_scanner"
-    lookback_days: 14
+    lookback_days: 30
     titles:
       - "marketing operations engineer"
       - "marketing operations manager"
@@ -297,7 +296,7 @@ scanners:
   g2:
     enabled: true
     module: "scripts.scanners.g2_scanner"
-    lookback_days: 14
+    lookback_days: 30
     keywords:
       - "Marketo"
       - "HubSpot Enterprise"
@@ -314,7 +313,7 @@ scoring:
     job_posting: 3.0
     funding_event: 2.5
     linkedin_activity: 2.0
-    g2_review_frustration: 2.5   # Public G2 frustration = active evaluation signal
+    map_frustration: 2.5         # Public MAP frustration on LinkedIn/blog = active evaluation signal
 
   half_lives_days:
     github_repo: 14.0    # Longer half-life — data infra repos stay relevant
@@ -323,7 +322,7 @@ scoring:
     job_posting: 14.0    # MOPs job open for 2 weeks = active project
     funding_event: 30.0  # Funding buys a longer window than RL signals
     linkedin_activity: 3.0
-    g2_review_frustration: 21.0  # Reviews stay relevant for ~3 weeks
+    map_frustration: 21.0        # LinkedIn posts stay relevant for ~3 weeks
 
   icp_weight: 0.45      # ICP fit slightly higher weight than RL vertical
   intent_weight: 0.55   # Intent still dominant — a perfect-fit company with no MOPs hire is not ready
