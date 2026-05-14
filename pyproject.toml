@@ -9,6 +9,7 @@ description = "Signal-based outbound sales engine — configure for any ICP"
 requires-python = ">=3.11"
 dependencies = [
     "requests",
+    "beautifulsoup4>=4.12",
     "pydantic",
     "python-dotenv",
     "sqlalchemy>=1.4",

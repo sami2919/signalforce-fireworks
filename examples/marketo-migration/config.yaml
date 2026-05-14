@@ -295,7 +295,7 @@ scanners:
 
   g2:
     enabled: true
-    module: "scripts.scanners.g2_scanner"
+    module: "scripts.scanners.g2_authenticated_scanner"
     lookback_days: 30
     keywords:
       - "Marketo"
