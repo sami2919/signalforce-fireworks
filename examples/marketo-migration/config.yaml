@@ -314,6 +314,7 @@ scoring:
     funding_event: 2.5
     linkedin_activity: 2.0
     map_frustration: 2.5         # Public MAP frustration on LinkedIn/blog = active evaluation signal
+    g2_review: 3.5               # Authenticated G2 review — named company + named vendor = highest signal
 
   half_lives_days:
     github_repo: 14.0    # Longer half-life — data infra repos stay relevant
@@ -323,6 +324,7 @@ scoring:
     funding_event: 30.0  # Funding buys a longer window than RL signals
     linkedin_activity: 3.0
     map_frustration: 21.0        # LinkedIn posts stay relevant for ~3 weeks
+    g2_review: 21.0              # G2 reviews don't expire quickly — reviewer frustration is durable
 
   icp_weight: 0.45      # ICP fit slightly higher weight than RL vertical
   intent_weight: 0.55   # Intent still dominant — a perfect-fit company with no MOPs hire is not ready
