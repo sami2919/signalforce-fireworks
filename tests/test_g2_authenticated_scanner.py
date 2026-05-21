@@ -185,5 +185,5 @@ def test_scan_module_function() -> None:
         "scripts.scanners.g2_authenticated_scanner.G2AuthenticatedScanner.scan"
     ) as mock_scan:
         mock_scan.return_value = MagicMock(scan_type="g2_review", signals_found=[])
-        result = scan(cfg)
+        scan(cfg)
     mock_scan.assert_called_once_with(7)
