@@ -261,7 +261,8 @@ class G2AuthenticatedScanner:
             time.sleep(0.5)
 
     def _extract_company(self, review: dict) -> str | None:
-        title = review.get("reviewer", {}).get("title", "") or ""
+        reviewer = review.get("reviewer") or {}
+        title = reviewer.get("title") or ""
         m = _AT_COMPANY_RE.search(title)
         if m:
             name = m.group(1).strip().rstrip(".,")
