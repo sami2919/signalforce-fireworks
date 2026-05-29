@@ -342,3 +342,21 @@ scoring:
     A: 6.0    # Marketo+Salesforce ICP fit (10×0.45=4.5) + strong signal (9×0.55=4.95) = 9.45 → A
     B: 3.5    # Single MODERATE signal + partial ICP fit reliably reaches B
     C: 1.5    # Any real signal clears C; below is noise
+
+filters:
+  # Companies excluded from scoring — not realistic mid-market outbound targets.
+  # The ICP is 50–500 employees, Series A–C. These are enterprise/large-cap or
+  # wrong-vertical companies that show up because they hire MOPs people.
+  company_blocklist:
+    - "Anthropic"
+    - "Databricks"
+    - "Chime"
+    - "Dave"
+    - "ZOE"
+    - "Bolt.new"
+    - "Goodfire"
+    - "Cognition"
+    - "Fiddler AI"
+    - "D2L"
+    - "dnb"
+    - "wheelhousedmg"
