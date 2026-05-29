@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 _COOKIE_ENV_VAR = "G2_SESSION_COOKIE"
 
 _MAP_VENDORS: list[dict] = [
-    {"slug": "marketo", "display": "Marketo"},
+    {"slug": "adobe-marketo-engage", "display": "Marketo"},
     {"slug": "hubspot", "display": "HubSpot"},
     {"slug": "pardot", "display": "Pardot"},
 ]
@@ -322,6 +322,8 @@ def scan(config: ScannerConfig) -> ScanResult:
 if __name__ == "__main__":
     import argparse
 
+    from dotenv import load_dotenv
+    load_dotenv()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     parser = argparse.ArgumentParser(description="G2 authenticated review scanner (JSON API)")
     parser.add_argument(

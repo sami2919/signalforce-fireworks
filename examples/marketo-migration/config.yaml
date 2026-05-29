@@ -304,6 +304,15 @@ scanners:
       - "MAP migration"
       - "marketing automation"
 
+  g2_seeds:
+    enabled: true
+    module: "scripts.scanners.g2_seed_scanner"
+    lookback_days: 30
+    keywords:
+      - "Marketo"
+      - "HubSpot Enterprise"
+      - "Pardot"
+
 scoring:
   intent_weights:
     # Job posting is the strongest signal — MOPs hire means the pain is real and budgeted

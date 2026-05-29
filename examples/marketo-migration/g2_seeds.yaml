@@ -1,0 +1,16 @@
+# Manual G2 signal seeds — companies you found on G2 showing MAP frustration.
+#
+# How to populate:
+#   1. Go to g2.com/products/adobe-marketo-engage/reviews — filter 1-3 stars
+#   2. Go to g2.com/products/hubspot/reviews — filter 1-3 stars
+#   3. Go to g2.com/products/pardot/reviews — filter 1-3 stars
+#   4. For each frustrated reviewer: note company name, vendor, star rating, paste quote
+#
+# The scanner emits these as g2_review signals (weight 3.5) in the scoring engine.
+
+reviews:
+  - company: "Example Corp"
+    vendor: "Marketo"
+    star_rating: 2
+    snippet: "Too complex and expensive for our team. We are evaluating alternatives."
+    review_url: "https://www.g2.com/products/adobe-marketo-engage/reviews"
