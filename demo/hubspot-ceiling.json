@@ -247,7 +247,10 @@
     "cache_read_input_tokens": 0,
     "cache_creation_input_tokens": 1226,
     "input_tokens": 1015,
-    "output_tokens": 5584
+    "output_tokens": 5584,
+    "platform_fit": "Every field maps to a Conversion primitive: the segment is Salesforce SOQL plus warehouse trait joins, the touch sequence carries execution / QA / optimization agent assignments, and the whole brief is a typed JSON object delivered by webhook \u2014 no human translation step between signal and campaign.",
+    "build_time_on_conversion_platform": "~1 day. Segment, agent roles, and suppression rules drop straight into the campaign builder; the signal stack and shelf-life feed the trigger and optimization layers.",
+    "what_this_proves": "A GTM engineer can compile a buying-window signal stack into a ready-to-run lifecycle campaign \u2014 replacing intuition and manual research with a typed, schema-enforced system."
   },
   "why_now": {
     "timing_score": "HIGH",

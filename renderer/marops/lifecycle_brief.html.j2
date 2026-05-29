@@ -302,7 +302,7 @@
 
     <div class="kv">
       <span class="k">Personalization tokens:</span>
-      {% for token in t.personalization_tokens %}<span class="v">{{ "{{" }}{{ token }}{{ "}}" }}</span>{% if not loop.last %} &middot; {% endif %}{% endfor %}
+      {% for token in t.personalization_tokens %}<span class="v">{{ "{{" }}{{ token | replace("{", "") | replace("}", "") }}{{ "}}" }}</span>{% if not loop.last %} &middot; {% endif %}{% endfor %}
     </div>
 
     <div class="kv" style="margin-top: 6px;"><span class="k">QA rules:</span></div>

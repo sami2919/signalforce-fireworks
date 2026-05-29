@@ -113,7 +113,9 @@ def test_validate_arxiv_no_key_needed():
 def test_validate_enrichment_needs_at_least_one():
     """enrichment scanner raises ValueError when none of the three keys are set."""
     with patch.dict("os.environ", {}, clear=True):
-        config = AppConfig()
+        # _env_file=None disables the .env file source so the test stays hermetic
+        # even on a machine whose .env defines the enrichment keys.
+        config = AppConfig(_env_file=None)
         with pytest.raises(ValueError, match="apollo|hunter|prospeo"):
             validate_keys_for_scanner("enrichment", config)
 

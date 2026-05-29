@@ -37,7 +37,7 @@ def _shelf_life(days_ago: int, window_days: int = 14) -> int:
 
 
 class WhyNowSignal(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, use_enum_values=True)
 
     signal_type: str  # e.g. "g2_review_velocity", "hiring", "conference", "funding"
     description: str
@@ -56,7 +56,7 @@ class WhyNowSignal(BaseModel):
 
 
 class WhyNowBlock(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, use_enum_values=True)
 
     timing_score: SignalTimingTier
     signals: list[WhyNowSignal]
