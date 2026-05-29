@@ -105,3 +105,22 @@ class TestFundingSeedScanner:
         config = _make_config(str(seed_file))
         result = scan(config)
         assert result.signals_found[0].signal_strength == SignalStrength.WEAK
+
+    def test_medium_funding_round_scores_moderate(self, tmp_path):
+        """Funding >= $10M and < $50M should score MODERATE signal strength."""
+        from scripts.scanners.funding_seed_scanner import scan
+
+        seed_file = _write_seeds(tmp_path, {
+            "events": [
+                {
+                    "company": "MidCo",
+                    "amount_usd": 25_000_000,
+                    "stage": "Series B",
+                    "snippet": "Raised $25M Series B.",
+                    "source_url": "https://example.com",
+                }
+            ]
+        })
+        config = _make_config(str(seed_file))
+        result = scan(config)
+        assert result.signals_found[0].signal_strength == SignalStrength.MODERATE

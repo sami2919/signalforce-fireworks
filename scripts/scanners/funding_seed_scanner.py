@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_SEED_FILE = Path(__file__).parent.parent.parent / "config" / "funding_seeds.yaml"
 
-_STRONG_THRESHOLD_USD = 50_000_000    # >= $50M → STRONG
+_STRONG_THRESHOLD_USD = 50_000_000  # >= $50M → STRONG
 _MODERATE_THRESHOLD_USD = 10_000_000  # >= $10M → MODERATE
 # < $10M → WEAK
 
@@ -69,22 +69,24 @@ def scan(config: ScannerConfig) -> ScanResult:
         snippet = event.get("snippet", "")
         source_url = event.get("source_url", "")
 
-        signals.append(Signal(
-            signal_type="funding_event",
-            company_name=company,
-            signal_strength=_score(amount_usd),
-            source_url=source_url,
-            raw_data={
-                "amount_usd": amount_usd,
-                "stage": stage,
-                "snippet": snippet,
-            },
-            metadata={
-                "source_type": "funding_manual_seed",
-                "funding_stage": stage,
-                "amount_usd": amount_usd,
-            },
-        ))
+        signals.append(
+            Signal(
+                signal_type="funding_event",
+                company_name=company,
+                signal_strength=_score(amount_usd),
+                source_url=source_url,
+                raw_data={
+                    "amount_usd": amount_usd,
+                    "stage": stage,
+                    "snippet": snippet,
+                },
+                metadata={
+                    "source_type": "funding_manual_seed",
+                    "funding_stage": stage,
+                    "amount_usd": amount_usd,
+                },
+            )
+        )
 
     logger.info("Funding seed scanner: %d signals loaded from %s", len(signals), seed_file)
 
