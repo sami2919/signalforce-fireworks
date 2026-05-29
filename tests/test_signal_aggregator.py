@@ -110,7 +110,7 @@ def test_blocklist_is_case_insensitive(config):
 def test_empty_blocklist_filters_nothing(config):
     """An empty blocklist is the default and must not drop anything."""
     signals = [
-        _make_signal("Anthropic", "job_posting", SignalStrength.MODERATE, ["Marketo"]),
+        _make_signal("TestCompany", "job_posting", SignalStrength.MODERATE, ["Marketo"]),
     ]
     results = aggregate_and_score(signals, config)
     assert len(results) == 1
