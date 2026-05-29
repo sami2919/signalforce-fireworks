@@ -46,9 +46,12 @@ def aggregate_and_score(
     if not signals:
         return []
 
+    blocklist = {name.lower() for name in config.filters.company_blocklist}
+
     by_company: dict[str, list[Signal]] = defaultdict(list)
     for signal in signals:
-        by_company[signal.company_name].append(signal)
+        if signal.company_name.lower() not in blocklist:
+            by_company[signal.company_name].append(signal)
 
     scorer = IntentScorer(config)
     results: list[ScoredCompany] = []

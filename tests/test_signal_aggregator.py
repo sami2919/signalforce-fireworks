@@ -74,3 +74,43 @@ def test_scored_company_has_expected_fields(config):
     assert hasattr(r, "icp_fit")
     assert hasattr(r, "scoring_result")
     assert isinstance(r.icp_fit, float)
+
+
+def test_blocklisted_company_excluded(config):
+    """Companies in the blocklist should be dropped before scoring."""
+    from scripts.config_loader import FiltersConfig
+
+    config_with_blocklist = config.model_copy(
+        update={"filters": FiltersConfig(company_blocklist=["Anthropic", "Databricks"])}
+    )
+    signals = [
+        _make_signal("Anthropic", "job_posting", SignalStrength.MODERATE, ["Marketo"]),
+        _make_signal("Vanta", "job_posting", SignalStrength.MODERATE, ["HubSpot"]),
+    ]
+    results = aggregate_and_score(signals, config_with_blocklist)
+    companies = [r.company_name for r in results]
+    assert "Anthropic" not in companies
+    assert "Vanta" in companies
+
+
+def test_blocklist_is_case_insensitive(config):
+    """Blocklist matching must normalize case — scanner output can be lowercase."""
+    from scripts.config_loader import FiltersConfig
+
+    config_with_blocklist = config.model_copy(
+        update={"filters": FiltersConfig(company_blocklist=["Anthropic"])}
+    )
+    signals = [
+        _make_signal("anthropic", "job_posting", SignalStrength.MODERATE, ["Marketo"]),
+    ]
+    results = aggregate_and_score(signals, config_with_blocklist)
+    assert results == []
+
+
+def test_empty_blocklist_filters_nothing(config):
+    """An empty blocklist is the default and must not drop anything."""
+    signals = [
+        _make_signal("Anthropic", "job_posting", SignalStrength.MODERATE, ["Marketo"]),
+    ]
+    results = aggregate_and_score(signals, config)
+    assert len(results) == 1
