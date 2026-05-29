@@ -313,6 +313,14 @@ scanners:
       - "HubSpot Enterprise"
       - "Pardot"
 
+  funding_seeds:
+    enabled: true
+    module: "scripts.scanners.funding_seed_scanner"
+    lookback_days: 30
+    keywords:
+      - "B2B SaaS"
+      - "enterprise"
+
 scoring:
   intent_weights:
     # Job posting is the strongest signal — MOPs hire means the pain is real and budgeted
