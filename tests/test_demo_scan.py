@@ -1,6 +1,8 @@
 from unittest.mock import patch
-from scripts.models import Signal, SignalStrength
-from scripts.demo_scan import run_demo_scan, format_grade_table
+from scripts.models import Signal, SignalStrength, ICPScore
+from scripts.demo_scan import run_demo_scan, format_grade_table, _GRADE_STARS
+from scripts.signal_aggregator import ScoredCompany
+from scripts.intent_scorer import ScoringResult
 
 
 def _make_signal(company: str, skills: list[str], strength: SignalStrength = SignalStrength.STRONG) -> Signal:
@@ -56,3 +58,44 @@ def test_format_grade_table_empty_shows_no_signals_message():
     """format_grade_table with empty results should show helpful message."""
     table = format_grade_table([])
     assert "No signals" in table or "no signals" in table.lower()
+
+
+def _make_scored_company(company: str, signal_types: list[str]) -> ScoredCompany:
+    signals = [
+        Signal(
+            signal_type=st,
+            company_name=company,
+            signal_strength=SignalStrength.MODERATE,
+            source_url="https://example.com",
+            raw_data={},
+        )
+        for st in signal_types
+    ]
+    scoring_result = ScoringResult(
+        intent_score=5.0,
+        combined_score=5.5,
+        icp_score=ICPScore.B,
+        signal_count=len(signals),
+        source_types=len(set(signal_types)),
+    )
+    return ScoredCompany(
+        company_name=company,
+        signals=signals,
+        icp_fit=3.0,
+        scoring_result=scoring_result,
+    )
+
+
+def test_format_grade_table_shows_signal_type_abbreviations():
+    """Table must show signal type abbreviations so stacking is visible in the demo."""
+    results = [_make_scored_company("Vanta", ["job_posting", "g2_review", "funding_event"])]
+    table = format_grade_table(results)
+    assert "job" in table
+    assert "g2" in table
+    assert "$" in table
+
+
+def test_format_grade_table_empty_returns_no_signals_message():
+    """Empty results should return a helpful message."""
+    table = format_grade_table([])
+    assert "No signals found" in table

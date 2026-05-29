@@ -30,6 +30,17 @@ _GRADE_STARS = {
 }
 _GRADE_ORDER = [ICPScore.A, ICPScore.B, ICPScore.C, ICPScore.D]
 
+_TYPE_ABBREV: dict[str, str] = {
+    "job_posting": "job",
+    "g2_review": "g2",
+    "funding_event": "$",
+    "github_repo": "gh",
+    "linkedin_activity": "li",
+    "map_frustration": "map",
+    "huggingface_model": "hf",
+    "arxiv_paper": "arxiv",
+}
+
 
 def run_demo_scan(lookback_days: int | None = None) -> list[ScoredCompany]:
     """Run all enabled scanners and return sorted ScoredCompany list."""
@@ -56,18 +67,20 @@ def format_grade_table(results: list[ScoredCompany]) -> str:
 
     lines = [
         "",
-        f"  {'GRADE':<8} {'COMPANY':<30} {'ICP FIT':>8} {'SIGNALS':>8} {'SCORE':>7}",
-        "  " + "─" * 65,
+        f"  {'GRADE':<8} {'COMPANY':<28} {'ICP FIT':>8} {'SIGNALS':>8} {'SCORE':>7}  TYPES",
+        "  " + "─" * 75,
     ]
     for r in results:
         grade = r.scoring_result.icp_score.value
         stars = _GRADE_STARS.get(r.scoring_result.icp_score, "    ")
+        unique_types = sorted({s.signal_type for s in r.signals})
+        type_str = " ".join(_TYPE_ABBREV.get(t, t[:4]) for t in unique_types)
         lines.append(
-            f"  [{grade}] {stars}  {r.company_name:<26} "
+            f"  [{grade}] {stars}  {r.company_name:<24} "
             f"{r.icp_fit:>7.1f}  {r.scoring_result.signal_count:>6}  "
-            f"{r.scoring_result.combined_score:>6.1f}"
+            f"{r.scoring_result.combined_score:>6.1f}  {type_str}"
         )
-    lines.append("  " + "─" * 65)
+    lines.append("  " + "─" * 75)
     return "\n".join(lines)
 
 
