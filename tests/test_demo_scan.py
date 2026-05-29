@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from scripts.models import Signal, SignalStrength, ICPScore
-from scripts.demo_scan import run_demo_scan, format_grade_table, _GRADE_STARS
+from scripts.demo_scan import run_demo_scan, format_grade_table
 from scripts.signal_aggregator import ScoredCompany
 from scripts.intent_scorer import ScoringResult
 
