@@ -1,4 +1,37 @@
-# SignalForce · `marops` branch
+# SignalForce · `kana-ai-first` branch
+
+> **A Customer Zero GTM engine for Kana — ranked account queue, routing, experiment tags, HubSpot write-back, plus a smaller supporting brief that shows how Kana should use its own agents internally.**
+
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue) ![License MIT](https://img.shields.io/badge/license-MIT-green) ![Tests 547 passing](https://img.shields.io/badge/tests-547%20passing-brightgreen) ![Claude tool_use](https://img.shields.io/badge/Claude-tool__use%20schema-8A2BE2)
+
+> **You're looking at the `kana-ai-first` branch.** It repoints SignalForce at the exact job Kana is hiring for: an AI-first GTM engineer who owns account discovery, routing, experimentation, HubSpot plumbing, and internal agent usage as one system. The `marops` branch remains the Conversion walk-in artifact; this branch is the Kana version of the same idea.
+
+## The 30-second version
+
+For Kana, the right proof is not “I rebuilt your product.” It is **Customer Zero**: the internal GTM engine that increases at-bats without increasing manual ops work. This branch turns SignalForce into that proof surface.
+
+What it does:
+
+- scans for AI-first demand-gen signals using a Kana-targeted ICP
+- ranks live or sample accounts into an operator-friendly queue
+- assigns outbound route, message angle, experiment tag, and HubSpot write-back action
+- renders a smaller supporting brief showing how Kana should use its own agents internally
+
+Run it:
+
+```bash
+git clone -b kana-ai-first https://github.com/sami2919/SignalForce.git
+cd SignalForce && pip install -e ".[dev]"
+
+# Deterministic walk-in mode:
+python -m scripts.kana_demo --sample
+
+# Writes:
+#   out/kana-customer-zero.html
+#   out/kana-agent-brief.html
+```
+
+The queue artifact is the hero. The supporting brief is there to prove product empathy without pretending to be Kana.
 
 > **A lifecycle campaign brief in the exact shape Conversion's platform consumes — generated from a YAML config by Claude, schema-enforced, in ~30 seconds for ~$0.002 a brief.**
 
