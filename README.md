@@ -427,6 +427,83 @@ See [`docs/results-framework.md`](docs/results-framework.md) for full metric def
 
 The Minimal tier runs on n8n Cloud ($24/mo) + Instantly.ai ($37/mo) + Claude API (~$10–20/mo). All signal scanners use free APIs. See [`docs/cost-analysis.md`](docs/cost-analysis.md) for a tool-by-tool breakdown.
 
+
+---
+
+## Fireworks AI Demo
+
+SignalForce can use Fireworks AI as the inference layer for GTM intelligence workflows.
+
+The Fireworks demo configures SignalForce around companies building production AI applications where inference matters: speed, cost, scale, open-source model flexibility, and model customization.
+
+> Built as a Fireworks-powered GTM workflow demo — SignalForce uses Fireworks to convert raw GTM signals into structured account intelligence for AI companies with inference-heavy workloads.
+
+### The workflow
+
+1. Loads a Fireworks-style ICP ([`configs/icps/fireworks_ai.yaml`](configs/icps/fireworks_ai.yaml)).
+2. Reads raw company signals from seeded demo accounts ([`examples/fireworks-demo/accounts.json`](examples/fireworks-demo/accounts.json)).
+3. Uses Fireworks to generate structured account intelligence.
+4. Outputs fit score, why-now reasoning, likely pain points, buyer persona, and outreach angle.
+5. Saves structured JSON to `outputs/fireworks_icp_demo.json`.
+
+### Run the demo
+
+```bash
+export FIREWORKS_API_KEY=your_key_here
+python scripts/demo_fireworks_icp.py
+```
+
+Or via the CLI:
+
+```bash
+python -m scripts.marops.cli fireworks-demo
+```
+
+### Example output
+
+```
+🔥 SignalForce x Fireworks ICP Demo
+
+  1. Voice AI Support Startup — 94/100
+     Intent:           Urgent
+     Why now:           Real-time voice workflows make inference latency a direct product bottleneck.
+     Fireworks fit:     Fireworks can help serve low-latency inference for streaming AI interactions.
+     Persona:           Head of AI Infrastructure
+     Outbound angle:    Low-latency inference for production voice AI
+     LinkedIn message:  Saw your team is hiring around real-time AI and streaming responses. Curious if inference latency has become a bottleneck as usage grows.
+     Cold email:        Scaling real-time AI inference
+
+  2. Cursor-like AI Coding Platform — 88/100
+     ...
+```
+
+### Why Fireworks?
+
+Fireworks is a strong fit for this workflow because GTM automation needs fast, structured outputs that can plug into systems like Slack, HubSpot, and outbound tools.
+
+SignalForce uses Fireworks to convert raw signals into predictable JSON fields:
+
+- `fit_score`
+- `intent_level`
+- `matched_signals`
+- `why_now`
+- `fireworks_relevance`
+- `recommended_persona`
+- `outbound_angle`
+- `linkedin_message`
+
+This demonstrates Fireworks powering a real business workflow, not just a chatbot.
+
+### Existing MarOps workflows with Fireworks
+
+You can also run existing MarOps workflows with Fireworks as the backend:
+
+```bash
+export FIREWORKS_API_KEY=your_key_here
+python -m scripts.marops.cli veriforce --backend fireworks
+```
+
+
 ---
 
 ## Contributing
